@@ -4,10 +4,12 @@ public class Info {
 
 	private String id;
 	private String password;
+	private int count;
 
 	public Info(String id, String password) {
 		this.id = id;
 		this.password = password;
+		this.count = 0;
 	}
 
 	public String getId() {
@@ -21,5 +23,13 @@ public class Info {
 	// 비밀번호만 변경가능
 	public void setPassWord(String password) {
 		this.password = password;
+	}
+
+	public int getCount() {
+		return this.count;
+	}
+
+	public void setCountPlus() {
+		this.count++;
 	}
 }

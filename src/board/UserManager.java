@@ -15,7 +15,7 @@ public class UserManager implements CRUD {
 		return instance;
 	}
 
-	private Map<String, User> UserList = new HashMap<String, User>();
+	private Map<String, User> userList = new HashMap<String, User>();
 
 	@Override
 	public void create() {
@@ -28,12 +28,12 @@ public class UserManager implements CRUD {
 	}
 
 	@Override
-	public void update() {
+	public void delete() {
 
 	}
 
 	@Override
-	public void delete() {
+	public void update() {
 
 	}
 }

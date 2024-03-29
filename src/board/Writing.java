@@ -4,13 +4,15 @@ public class Writing extends Info {
 
 	private String title;
 	private String content;
-	private int count;
+	private int number;
+	private boolean isDeleted;
 
-	public Writing(String id, String password, String title, String content) {
+	public Writing(String id, String password, String title, String content, int number) {
 		super(id, password);
 		this.title = title;
 		this.content = content;
-		this.count = 0;
+		this.number = number;
+		this.isDeleted = false;
 	}
 
 	public String getTitle() {
@@ -29,7 +31,15 @@ public class Writing extends Info {
 		this.content = content;
 	}
 
-	public void setCountPlus() {
-		this.count++;
+	public int getNumber() {
+		return this.number;
+	}
+
+	public boolean getIsDeleted() {
+		return this.isDeleted;
+	}
+
+	public void setIsDeleted() {
+		this.isDeleted = !this.isDeleted;
 	}
 }
