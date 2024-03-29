@@ -15,6 +15,8 @@ public class Main {
 		//			-> 2. UserManager,WritingManager : interface(CRUD)
 		// User , Writing , UserManager(싱글톤 패턴 이용) , WritingManager(싱글톤 패턴 이용) , board-(게시글들 모음) , Main-(실행만)
 		
+		Board board = new Board("자유 게시판");
+		board.run();
 		
 	}
 
