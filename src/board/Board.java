@@ -16,10 +16,12 @@ public class Board {
 	private final int MY_PAGE = 6;
 	private final int END = 0;
 
-	private final int CREATE_POST = 1;
-	private final int DELETE_POST = 2;
-	private final int INQUIRY_POST = 3;
-	private final int MODIFY_POST = 4;
+	private final int NEXT = 1;
+	private final int PREVIOUS = 2;
+	private final int CREATE_POST = 3;
+	private final int DELETE_POST = 4;
+	private final int INQUIRY_POST = 5;
+	private final int MODIFY_POST = 6;
 
 	private final int TYPE_IN = 1;
 	private final int TYPE_OUT = 2;
@@ -30,10 +32,14 @@ public class Board {
 	private final int FIX_TITLE = 1;
 	private final int FIX_CONTENT = 2;
 
+	private final int PAGE_SIZE = 5;
 	private String type;
 	private int sel;
 	private int totalCount;
+	private int pageCount;
 	private int curPage;
+	private int startNum;
+	private int endNum;
 
 	private User curUser;
 
@@ -42,6 +48,8 @@ public class Board {
 		this.sel = -1;
 		this.totalCount = 1;
 		this.curPage = 1;
+		calEndPage();
+
 	}
 
 	private boolean isRun() {
@@ -211,15 +219,21 @@ public class Board {
 	private void enterBoardMenu() {
 		while (true) {
 			showBoard();
-			System.out.println("[1] 게시글 작성");
-			System.out.println("[2] 게시글 삭제");
-			System.out.println("[3] 게시글 조회");
-			System.out.println("[4] 게시글 수정");
+			System.out.println("[1] 다음 페이지");
+			System.out.println("[2] 이전 페이지");
+			System.out.println("[3] 게시글 작성");
+			System.out.println("[4] 게시글 삭제");
+			System.out.println("[5] 게시글 조회");
+			System.out.println("[6] 게시글 수정");
 			System.out.println("[0] 뒤로가기");
 
 			int boardSel = inputNumber(">> ");
 
-			if (boardSel == CREATE_POST && checkLog(TYPE_IN))
+			if (boardSel == NEXT)
+				curPage++;
+			else if (boardSel == PREVIOUS)
+				curPage--;
+			else if (boardSel == CREATE_POST && checkLog(TYPE_IN))
 				creatWriting();
 			else if (boardSel == DELETE_POST && checkLog(TYPE_IN))
 				deleteWriting();
@@ -237,9 +251,9 @@ public class Board {
 
 	private void showBoard() {
 		writingManager.sort();
-		// 여기서 게시글들이 5개단위로 보임
+		calEndPage();
 		System.out.printf("===================%s===================\n", this.type);
-		for (int i = 1; i <= totalCount; i++) {
+		for (int i = startNum; i <= endNum; i++) {
 			Writing curWriting = writingManager.read(i + "");
 			if (curWriting.getIsdeleted())
 				System.err.println(curWriting);
@@ -247,6 +261,27 @@ public class Board {
 				System.out.println(curWriting);
 		}
 		System.out.println("==============================================");
+		System.out.printf("[%d / %d]\n", curPage, pageCount + 1);
+	}
+
+	private void calEndPage() {
+		pageCount = totalCount / PAGE_SIZE;
+		if (totalCount % PAGE_SIZE == 0)
+			pageCount--;
+		if (totalCount == 0)
+			pageCount++;
+
+		if (curPage >= pageCount + 1)
+			curPage = pageCount + 1;
+		else if (curPage < 1)
+			curPage = 1;
+
+		startNum = (curPage - 1) * PAGE_SIZE + 1;
+		endNum = startNum + PAGE_SIZE - 1;
+		if (endNum > totalCount) {
+			endNum = totalCount;
+		}
+
 	}
 
 	private void creatWriting() {
