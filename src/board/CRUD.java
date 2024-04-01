@@ -1,12 +1,14 @@
 package board;
 
-public interface CRUD {
+// 제네릭 타입으로
+public interface CRUD<T> {
 
-	public void create();
+	public boolean create(T info);
 
-	public void read();
+	public T read(String target);
 
-	public void update();
+	public void update(T info);
 
-	public void delete();
+	public boolean delete(String log, String pw);
+
 }

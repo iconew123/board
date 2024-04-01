@@ -13,4 +13,9 @@ public class User extends Info {
 		return this.name;
 	}
 
+	public User clone() {
+
+		return new User(this.getId(), this.getPassword(), this.name);
+	}
+
 }

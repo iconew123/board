@@ -21,11 +21,15 @@ public class Board {
 	private final int INQUIRY_POST = 3;
 	private final int MODIFY_POST = 4;
 
+	private final int TYPE_IN = 1;
+	private final int TYPE_OUT = 2;
+
 	private String type;
-	private String log;
 	private int sel;
 	private int totalCount;
 	private int curPage;
+
+	private User curUser;
 
 	public Board(String type) {
 		this.type = type;
@@ -59,58 +63,117 @@ public class Board {
 	}
 
 	private void printMenu() {
+		System.out.println(curUser == null ? "로그아웃상태" : String.format(curUser.getName() + "님 로그인 중..."));
 		System.out.println("[1] 회원가입");
 		System.out.println("[2] 회원탈퇴");
-		System.out.println("[3] 회원탈퇴");
-		System.out.println("[4] 회원탈퇴");
+		System.out.println("[3] 로그인");
+		System.out.println("[4] 로그아웃");
 		System.out.println("[5] 게시글 메뉴");
 		System.out.println("[6] 마이페이지");
 		System.out.println("[0] 종료");
 	}
 
-	private boolean checkLog() {
-		if (this.log.equals(""))
+	private boolean checkLog(int logState) {
+		if (!(curUser == null) && logState == TYPE_OUT) {
+			System.err.println("로그아웃 후 이용해주세요");
 			return false;
-		else
-			return true;
+		} else if (curUser == null && logState == TYPE_IN) {
+			System.err.println("로그인 후 이용해주세요");
+			return false;
+		}
+
+		return true;
 	}
 
 	private void choice(int sel) {
-		if (sel == JOIN && !checkLog())
+		if (sel == JOIN && checkLog(TYPE_OUT))
 			join();
-		else if (sel == UNREGISTER && checkLog())
+		else if (sel == UNREGISTER && checkLog(TYPE_IN))
 			unRegister();
-		else if (sel == LOG_IN && !checkLog())
+		else if (sel == LOG_IN && checkLog(TYPE_OUT))
 			logIn();
 		else if (sel == LOG_OUT)
 			logOut();
 		else if (sel == BOARD_MENU)
 			enterBoardMenu();
-		else if (sel == MY_PAGE)
+		else if (sel == MY_PAGE && checkLog(TYPE_IN))
 			myPage();
 		else if (sel == END)
 			System.out.println("시스템 종료");
-		else
-			System.err.println("없는 기능입니다.");
+
 	}
 
 	private void join() {
+		String name = inputString("회원 이름 입력 : ");
+		String id = inputString("회원 아이디 입력 : ");
+		String pw = inputString("회원 비밀번호 입력 입력 : ");
 
+		User tmpUser = new User(id, pw, name);
+
+		if (userManager.create(tmpUser))
+			System.out.println("회원가입 성공");
+		else
+			System.err.println("회원가입 실패");
 	}
 
 	private void unRegister() {
-
+		String pw = inputString("탈퇴 할 아이디 비밀번호 입력 : ");
+		if (userManager.delete(curUser.getId(), pw))
+			System.out.println("회원 탈퇴 완료");
+		else
+			System.err.println("회원 탈퇴 실패");
 	}
 
 	private void logIn() {
+		String id = inputString("ID : ");
+		String pw = inputString("PW : ");
+
+		if (userManager.checkLogIn(id, pw)) {
+			curUser = showUser(id);
+			System.out.println("로그인 성공");
+		} else
+			System.err.println("로그인 실패");
 
 	}
 
 	private void logOut() {
-
+		curUser = null;
 	}
 
+	private User showUser(String id) {
+		User tmpUser = userManager.read(id);
+		return tmpUser;
+	}
+
+	private final int changePw = 1;
+	private final int myWriting = 2;
+
 	private void myPage() {
+		myPageMenu();
+
+		int mySel = inputNumber(">> ");
+
+		if (mySel == changePw)
+			changePw();
+		else if (mySel == myWriting)
+			myWriting();
+		else
+			System.err.println("없는 기능입니다.");
+	}
+
+	private void myPageMenu() {
+		System.out.println("[1] 비밀번호 변경");
+		System.out.println("[2] 내가 쓴 글");
+	}
+
+	private void changePw() {
+		String pw = inputString("변경 할 비밀번호 입력");
+		curUser.setPassWord(pw);
+		userManager.update(curUser);
+//		글에대한 비밀번호도 변경
+	}
+
+	private void myWriting() {
 
 	}
 
@@ -134,13 +197,13 @@ public class Board {
 	}
 
 	private boolean boardChoice(int boardSel) {
-		if (boardSel == CREATE_POST && checkLog())
+		if (boardSel == CREATE_POST && checkLog(TYPE_IN))
 			creatWriting();
-		else if (boardSel == DELETE_POST && checkLog())
+		else if (boardSel == DELETE_POST && checkLog(TYPE_IN))
 			deleteWriting();
 		else if (boardSel == INQUIRY_POST)
 			inquiry();
-		else if (boardSel == MODIFY_POST && checkLog())
+		else if (boardSel == MODIFY_POST && checkLog(TYPE_IN))
 			modifyMenu();
 		else if (boardSel == END) {
 			System.out.println("초기메뉴로 이동합니다.");

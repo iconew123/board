@@ -3,7 +3,7 @@ package board;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WritingManager implements CRUD {
+public class WritingManager implements CRUD<Writing> {
 
 	private WritingManager() {
 
@@ -18,23 +18,25 @@ public class WritingManager implements CRUD {
 	private Map<String, Writing> writingList = new HashMap<String, Writing>();
 
 	@Override
-	public void create() {
+	public boolean create(Writing info) {
+
+		return true;
+	}
+
+	@Override
+	public Writing read(String target) {
+		return new Writing(target, target, target, target, 0);
+	}
+
+	@Override
+	public void update(Writing writing) {
 
 	}
 
 	@Override
-	public void read() {
+	public boolean delete(String id, String pw) {
 
-	}
-
-	@Override
-	public void update() {
-
-	}
-
-	@Override
-	public void delete() {
-
+		return true;
 	}
 
 }
