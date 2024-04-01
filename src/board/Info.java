@@ -9,7 +9,6 @@ public class Info {
 	public Info(String id, String password) {
 		this.id = id;
 		this.password = password;
-		this.count = 0;
 	}
 
 	public String getId() {
@@ -29,7 +28,7 @@ public class Info {
 		return this.count;
 	}
 
-	public void setCountPlus() {
-		this.count++;
+	public void setCount(int count) {
+		this.count = count;
 	}
 }

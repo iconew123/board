@@ -14,6 +14,8 @@ public class Writing extends Info {
 		this.number = number;
 		this.isDeleted = false;
 	}
+	
+
 
 	public String getTitle() {
 		return this.title;
@@ -35,11 +37,22 @@ public class Writing extends Info {
 		return this.number;
 	}
 
-	public boolean getIsDeleted() {
+	public boolean getIsdeleted() {
 		return this.isDeleted;
 	}
 
 	public void setIsDeleted() {
 		this.isDeleted = !this.isDeleted;
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return String.format("[글번호] : %d , [제목] : %s , [작성자] : %s , [조회수] :  %d", this.number, this.title, this.getId(), this.getCount());
+	}
+
+	public Writing clone() {
+
+		return new Writing(this.getId(), this.getPassword(), this.title, this.content, this.number);
 	}
 }

@@ -7,8 +7,10 @@ import java.util.Map;
 
 public class UserManager implements CRUD<User> {
 
-	private UserManager() {
+	private Map<String, User> userList = new HashMap<String, User>();
 
+	private UserManager() {
+		userList.put("ADMIN", new User("ADMIN", "ADMIN", "ADMIN"));
 	}
 
 	private static UserManager instance = new UserManager();
@@ -16,8 +18,6 @@ public class UserManager implements CRUD<User> {
 	public static UserManager getInstance() {
 		return instance;
 	}
-
-	private Map<String, User> userList = new HashMap<String, User>();
 
 	private boolean overlapId(String id) {
 
@@ -68,13 +68,15 @@ public class UserManager implements CRUD<User> {
 	@Override
 	public User read(String target) {
 
-		return userList.get(target).clone();
+		int count = userList.get(target).getCount();
+		User cloneUser = userList.get(target).clone();
+		cloneUser.setCount(count);
+
+		return cloneUser;
 	}
 
 	@Override
-	public boolean delete(String id, String pw) {
-		if (findError(id, pw))
-			return false;
+	public boolean delete(String id) {
 
 		userList.remove(id);
 		return true;

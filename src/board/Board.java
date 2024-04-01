@@ -24,6 +24,12 @@ public class Board {
 	private final int TYPE_IN = 1;
 	private final int TYPE_OUT = 2;
 
+	private final int CHANGE_PASSWORD = 1;
+	private final int MY_WRITING = 2;
+
+	private final int FIX_TITLE = 1;
+	private final int FIX_CONTENT = 2;
+
 	private String type;
 	private int sel;
 	private int totalCount;
@@ -34,7 +40,7 @@ public class Board {
 	public Board(String type) {
 		this.type = type;
 		this.sel = -1;
-		this.totalCount = 0;
+		this.totalCount = 1;
 		this.curPage = 1;
 	}
 
@@ -118,10 +124,14 @@ public class Board {
 
 	private void unRegister() {
 		String pw = inputString("탈퇴 할 아이디 비밀번호 입력 : ");
-		if (userManager.delete(curUser.getId(), pw))
+
+		if (curUser.getPassword().equals(pw)) {
+			userManager.delete(curUser.getId());
+			logOut();
 			System.out.println("회원 탈퇴 완료");
-		else
-			System.err.println("회원 탈퇴 실패");
+		} else
+			System.err.println("비밀번호가 일치하지 않습니다.");
+
 	}
 
 	private void logIn() {
@@ -145,17 +155,14 @@ public class Board {
 		return tmpUser;
 	}
 
-	private final int changePw = 1;
-	private final int myWriting = 2;
-
 	private void myPage() {
 		myPageMenu();
 
 		int mySel = inputNumber(">> ");
 
-		if (mySel == changePw)
+		if (mySel == CHANGE_PASSWORD)
 			changePw();
-		else if (mySel == myWriting)
+		else if (mySel == MY_WRITING)
 			myWriting();
 		else
 			System.err.println("없는 기능입니다.");
@@ -171,10 +178,34 @@ public class Board {
 		curUser.setPassWord(pw);
 		userManager.update(curUser);
 //		글에대한 비밀번호도 변경
+		for (int i = 1; i < totalCount; i++) {
+			Writing tmp = writingManager.read(i + "");
+			if (tmp.getId().equals(curUser.getId())) {
+				tmp.setPassWord(pw);
+				writingManager.update(tmp);
+			}
+		}
+
+		System.out.println("비밀번호 변경완료");
 	}
 
 	private void myWriting() {
+		System.out.printf("%s님의 글 목록 + 내용\n", curUser.getName());
+		for (int i = 1; i <= totalCount; i++) {
+			Writing tmp = writingManager.read(i + "");
+			if (tmp.getId().equals(curUser.getId())) {
+				System.out.println("====================================");
+				if (tmp.getIsdeleted())
+					System.err.println(tmp);
+				else {
+					System.out.println(tmp);
+					System.out.println(tmp.getContent());
+				}
+				System.out.println("====================================");
 
+			}
+
+		}
 	}
 
 	private void enterBoardMenu() {
@@ -182,52 +213,169 @@ public class Board {
 			showBoard();
 			System.out.println("[1] 게시글 작성");
 			System.out.println("[2] 게시글 삭제");
-			System.out.println("[4] 게시글 조회");
+			System.out.println("[3] 게시글 조회");
 			System.out.println("[4] 게시글 수정");
 			System.out.println("[0] 뒤로가기");
 
 			int boardSel = inputNumber(">> ");
-			if (!boardChoice(boardSel))
+
+			if (boardSel == CREATE_POST && checkLog(TYPE_IN))
+				creatWriting();
+			else if (boardSel == DELETE_POST && checkLog(TYPE_IN))
+				deleteWriting();
+			else if (boardSel == INQUIRY_POST)
+				inquiry();
+			else if (boardSel == MODIFY_POST && checkLog(TYPE_IN))
+				modifyMenu();
+			else if (boardSel == END) {
+				System.out.println("초기메뉴로 이동합니다.");
 				break;
+			}
 		}
+
 	}
 
 	private void showBoard() {
+		writingManager.sort();
 		// 여기서 게시글들이 5개단위로 보임
+		System.out.printf("===================%s===================\n", this.type);
+		for (int i = 1; i <= totalCount; i++) {
+			Writing curWriting = writingManager.read(i + "");
+			if (curWriting.getIsdeleted())
+				System.err.println(curWriting);
+			else
+				System.out.println(curWriting);
+		}
+		System.out.println("==============================================");
 	}
 
-	private boolean boardChoice(int boardSel) {
-		if (boardSel == CREATE_POST && checkLog(TYPE_IN))
-			creatWriting();
-		else if (boardSel == DELETE_POST && checkLog(TYPE_IN))
-			deleteWriting();
-		else if (boardSel == INQUIRY_POST)
-			inquiry();
-		else if (boardSel == MODIFY_POST && checkLog(TYPE_IN))
-			modifyMenu();
-		else if (boardSel == END) {
-			System.out.println("초기메뉴로 이동합니다.");
+	private void creatWriting() {
+		if (curUser.getCount() < 3) {
+			System.err.println("글 조회수가 3이상인 경우에만 글을 작성할 수 있습니다.");
+			System.out.println(curUser);
+			return;
+		}
+
+		System.out.print("글 제목입력 : ");
+		scan.nextLine();
+		String title = scan.nextLine();
+		String content = "";
+		content += addContent(content);
+		Writing tmpWrite = new Writing(curUser.getId(), curUser.getPassword(), title, content, ++totalCount);
+
+		if (writingManager.create(tmpWrite))
+			System.out.println("글 작성 완료");
+		else
+			System.err.println("글 작성 실패");
+	}
+
+	private String addContent(String content) {
+		int n = 0;
+		while (true) {
+			String tmp = inputString(++n + "번째 내용 입력 (종료 : . 입력) : ");
+			if (tmp.equals("."))
+				break;
+			content += tmp + "\n";
+		}
+		return content;
+	}
+
+	private void deleteWriting() {
+		String delNumber = inputString("삭제할 게시글 번호 입력 : ");
+		Writing curWriting = writingManager.read(delNumber);
+
+		if (findError(curWriting))
+			return;
+
+		if (writingManager.delete(delNumber))
+			System.out.println("글 삭제 완료");
+		else
+			System.err.println("글 삭제 실패");
+	}
+
+	private boolean findError(Writing curWriting) {
+
+		if (!curWriting.getId().equals(curUser.getId())) {
+			System.out.printf("해당 게시글은 %s사용자만 수정,삭제가 가능합니다.\n", curWriting.getId());
+			return false;
+		}
+
+		String pw = inputString("Pw : ");
+		if (!curWriting.getPassword().equals(pw)) {
+			System.err.println("비밀번호가 일치하지 않습니다.");
 			return false;
 		}
 
 		return true;
-
-	}
-
-	private void creatWriting() {
-
-	}
-
-	private void deleteWriting() {
-
 	}
 
 	private void inquiry() {
+		String inquiryNumber = inputString("조회 글 번호 입력 : ");
+		Writing curWriting = writingManager.read(inquiryNumber);
 
+		if (curWriting == null)
+			return;
+
+		if (curWriting.getIsdeleted()) {
+			System.err.println("삭제된 글은 읽을 수 없습니다.");
+			return;
+		}
+
+		int writingCount = curWriting.getCount() + 1;
+		if (curUser != null) {
+			int userCount = curUser.getCount() + 1;
+			curUser.setCount(userCount);
+			userManager.update(curUser);
+		}
+		curWriting.setCount(writingCount);
+		writingManager.update(curWriting);
+		System.out.println(curWriting.getContent());
 	}
 
 	private void modifyMenu() {
+		String modifyNumber = inputString("수정할 게시글 번호 입력 : ");
+		Writing curWriting = writingManager.read(modifyNumber);
 
+		if (curWriting.getIsdeleted()) {
+			System.err.println("삭제된 글은 읽을 수 없습니다.");
+			return;
+		}
+
+		if (!findError(curWriting))
+			return;
+
+		showModifyMenu();
+		int modifySel = inputNumber(">> ");
+
+		if (modifySel == FIX_TITLE)
+			modifyTitle(curWriting);
+		else if (modifySel == FIX_CONTENT)
+			modifyContent(curWriting);
+		else
+			System.err.println("없는 기능입니다.");
+	}
+
+	private void showModifyMenu() {
+		System.out.println("[1] 글 제목 수정");
+		System.out.println("[2] 글 내용 수정");
+	}
+
+	private void modifyTitle(Writing curWriting) {
+		System.out.print("글 제목입력 : ");
+		scan.nextLine();
+		String changeTitle = scan.nextLine();
+		curWriting.setTitle(changeTitle);
+		writingManager.update(curWriting);
+		System.out.println("수정완료");
+	}
+
+	private void modifyContent(Writing curWriting) {
+		System.out.printf("%s의 내용 수정\n", curWriting.getTitle());
+		String content = "";
+		content += addContent(content);
+		curWriting.setContent(content);
+		writingManager.update(curWriting);
+		System.out.println("수정완료");
 	}
 
 	public void run() {

@@ -17,5 +17,11 @@ public class User extends Info {
 
 		return new User(this.getId(), this.getPassword(), this.name);
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return String.format("%s님의 총 조회수 %d회", this.name, this.getCount());
+	}
 
 }

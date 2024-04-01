@@ -9,6 +9,6 @@ public interface CRUD<T> {
 
 	public void update(T info);
 
-	public boolean delete(String log, String pw);
+	public boolean delete(String log);
 
 }
