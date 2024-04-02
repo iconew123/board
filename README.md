@@ -17,4 +17,4 @@
 <img width="50%" src="https://github.com/iconew123/board/blob/master/images/%EC%BD%98%EC%86%94%20%EA%B2%8C%EC%8B%9C%ED%8C%90.jpg"/>
 
 > Demo <br>
-<img width="25%" src=""/>
+<img width="45%" src="https://github.com/iconew123/board/blob/master/images/Animation.gif"/>
