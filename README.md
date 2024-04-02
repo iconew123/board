@@ -14,7 +14,7 @@
   [9]. 회원 탈퇴 시, 쓴 글들은 남아있습니다.<br>
   
 > Class Diagram (UML) <br>
-<img width="50%" src=""/>
+<img width="50%" src="https://github.com/iconew123/board/blob/master/images/%EC%BD%98%EC%86%94%20%EA%B2%8C%EC%8B%9C%ED%8C%90.jpg"/>
 
 > Demo <br>
 <img width="25%" src=""/>
